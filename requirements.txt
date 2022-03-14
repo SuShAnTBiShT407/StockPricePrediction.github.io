@@ -6,6 +6,5 @@ pandas_datareader==0.10.0
 plotly==5.4.0
 scikit_learn==1.0.2
 tensorflow>=2.8.0
-streamlit==1.6.0
 yfinance==0.1.70
 streamlit
