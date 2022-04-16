@@ -38,24 +38,42 @@ def relativeret(df):
     cumret = cumret.fillna(0)
     return cumret
 
+def show_update(open_val,close_val,high_val,low_val,ov,hv,lv,cv):
+    kpi1, kpi2, kpi3, kpi4= st.columns(4)
+    kpi1.metric(label="$OPEN",value=open_val[len(open_val)-1],delta=ov)
+    kpi2.metric(label="$High",value=high_val[len(high_val)-1],delta=hv)
+    kpi3.metric(label="$Low",value=low_val[len(low_val)-1],delta=lv)
+    kpi4.metric(label="$Close",value=close_val[len(close_val)-1],delta=cv)  
+
 st.title("Stock Price Prediction ")
 st.subheader("- using Random Forest Regressor🚀📈ᵇʸ ˢᵘˢʰᵃⁿᵗ ᴮⁱˢʰᵗ ")
 
 
-kpi1, kpi2,kpi3= st.columns(3)
-kpi1.metric(label="$OPEN",value=200.22,delta=-1.4)
-kpi2.metric(label="$CLOSE",value=250.71,delta=+2.1)
-kpi3.metric(label="$AAPP",value=195.63,delta=+0.2)
 
 selected_stocks = st.selectbox("Select Dataset for prediction ",stocks)
-
-n_years = st.slider("Years of prediction : ",10,20)
-period = n_years *365
 
 start_date,end_date,dropdown=side_display()
 data_load_state = st.text("Load data................")
 data = load_data(selected_stocks,start_date,end_date)
 data_load_state.text("Loading done...!!")
+
+# for latest open values
+open_val = data['Open'].values
+ov = open_val[len(open_val)-1] - open_val[len(open_val)-2]
+
+#for latest high values
+high_val = data['High'].values
+hv = high_val[len(high_val)-1] - high_val[len(high_val)-2]
+
+low_val = data['Low'].values
+lv = low_val[len(low_val)-1] - low_val[len(low_val)-2]
+
+close_val = data['Close'].values
+cv = close_val[len(close_val)-1] - close_val[len(close_val)-2]
+
+show_update(open_val,close_val,high_val,low_val,ov,hv,lv,cv)
+
+
 if len(dropdown)>0:
     df = relativeret(yf.download(dropdown,start_date,end_date)['Adj Close'])
     st.line_chart(df)
@@ -144,23 +162,23 @@ details_display.write(y_pred.reshape(len(y_pred), 1))
 st.subheader("R2 Score for model : ")
 st.text(r2_score(y_test,y_pred))
 
-st.subheader("want to predict close price for any open price ?")
-open_input = st.text_input("Open ",198.779999)
-high_input = st.text_input("High ",199.990005)
-low_input = st.text_input("Low ",197.619995)
+with st.form(key=" form1"):
+    st.subheader("want to predict close price for any open price ?")
+    open_input = st.text_input("Open ",198.779999)
+    high_input = st.text_input("High ",199.990005)
+    low_input = st.text_input("Low ",197.619995)
+    input_values = []
+    final_input = []
+    input_values.append(open_input)
+    input_values.append(high_input)
+    input_values.append(low_input)
+    final_input.append(input_values)
 
-input_values = []
-final_input = []
-input_values.append(open_input)
-input_values.append(high_input)
-input_values.append(low_input)
-final_input.append(input_values)
+    final_input=sc.transform(final_input)
+    st.form_submit_button(label="Predict")
 
-final_input=sc.transform(final_input)
-
-
-st.subheader('Predicted Closing Price ')
-st.write(regression.predict(final_input))
+    st.subheader('Predicted Closing Price ')
+    st.write(regression.predict(final_input))
 
 st.subheader("R2 Score for model : ")
 st.text(r2_score(y_test,y_pred))
